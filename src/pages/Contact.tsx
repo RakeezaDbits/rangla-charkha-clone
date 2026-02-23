@@ -3,9 +3,9 @@ import contactModel from "@/assets/contact-model.jpg";
 import GoldButton from "@/components/GoldButton";
 
 const contactCards = [
-  { icon: Phone, title: "Call Us", detail: "+92-XXX-XXXXXXX", sub: "Mon – Sat: 10 AM – 8 PM" },
-  { icon: Mail, title: "Email Us", detail: "info@ranglacharkha.com", sub: "We'll reply within 24 hours" },
-  { icon: MapPin, title: "Visit Us", detail: "Lahore, Pakistan", sub: "Mon – Sat: 10 AM – 8 PM" },
+  { icon: Phone, title: "Call Us", detail: "0320-9417086", sub: "Mon – Sat: 10 AM – 8 PM" },
+  { icon: Mail, title: "Email Us", detail: "ranglacharkha@gmail.com", sub: "We'll reply within 24 hours" },
+  { icon: MapPin, title: "Visit Us", detail: "Pakistan", sub: "Mon – Sat: 10 AM – 8 PM" },
 ];
 
 const Contact = () => {
