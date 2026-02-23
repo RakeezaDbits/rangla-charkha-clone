@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Facebook, Instagram, Mail, Phone } from "lucide-react";
 import logo from "@/assets/logo.jpeg";
 
 const Footer = () => {
@@ -12,6 +13,14 @@ const Footer = () => {
             <p className="font-body text-sm text-muted-foreground leading-relaxed">
               Premium lawn and casual wear for modern women in Pakistan. Affordable luxury fashion.
             </p>
+            <div className="flex gap-3">
+              <a href="https://facebook.com/ranglacharkha28" target="_blank" rel="noopener noreferrer" className="p-2 border border-border rounded-sm hover:border-primary/40 text-muted-foreground hover:text-primary transition-colors">
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a href="https://instagram.com/rangla_chaekha" target="_blank" rel="noopener noreferrer" className="p-2 border border-border rounded-sm hover:border-primary/40 text-muted-foreground hover:text-primary transition-colors">
+                <Instagram className="w-4 h-4" />
+              </a>
+            </div>
           </div>
 
           {/* Quick Links */}
@@ -25,11 +34,7 @@ const Footer = () => {
                 { label: "About Us", path: "/about" },
                 { label: "Contact", path: "/contact" },
               ].map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className="block font-body text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
+                <Link key={link.path} to={link.path} className="block font-body text-sm text-muted-foreground hover:text-primary transition-colors">
                   {link.label}
                 </Link>
               ))}
@@ -49,9 +54,16 @@ const Footer = () => {
           {/* Contact */}
           <div>
             <h4 className="font-display text-lg text-primary mb-4">Contact</h4>
-            <div className="space-y-2 font-body text-sm text-muted-foreground">
-              <p>info@ranglacharkha.com</p>
-              <p>WhatsApp: +92-XXX-XXXXXXX</p>
+            <div className="space-y-3 font-body text-sm text-muted-foreground">
+              <a href="mailto:ranglacharkha@gmail.com" className="flex items-center gap-2 hover:text-primary transition-colors">
+                <Mail className="w-4 h-4" /> ranglacharkha@gmail.com
+              </a>
+              <a href="tel:03209417086" className="flex items-center gap-2 hover:text-primary transition-colors">
+                <Phone className="w-4 h-4" /> 0320-9417086
+              </a>
+              <a href="https://wa.me/923209417086" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary transition-colors">
+                WhatsApp: 0320-9417086
+              </a>
               <p>Mon – Sat: 10 AM – 8 PM</p>
             </div>
           </div>

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Phone, Mail, User, MapPin } from "lucide-react";
+import { Menu, X, ShoppingCart, Heart, User, LogOut, Shield } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/hooks/useCart";
+import { useWishlist } from "@/hooks/useWishlist";
 import logo from "@/assets/logo.jpeg";
 
 const navLinks = [
@@ -14,6 +17,9 @@ const navLinks = [
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const { user, isAdmin, signOut } = useAuth();
+  const { cartCount } = useCart();
+  const { wishlistCount } = useWishlist();
 
   return (
     <header className="w-full relative z-50">
@@ -29,10 +35,10 @@ const Navbar = () => {
             <span>Summer Sale Live</span>
             <span>🔥</span>
           </div>
-          <div className="flex items-center gap-3 text-muted-foreground">
-            <MapPin className="w-4 h-4" />
-            <Mail className="w-4 h-4" />
-            <User className="w-4 h-4" />
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <a href="https://wa.me/923209417086" target="_blank" rel="noopener noreferrer" className="p-1.5 hover:text-primary transition-colors text-xs font-body">
+              03209417086
+            </a>
           </div>
         </div>
       </div>
@@ -59,14 +65,46 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Mobile Toggle */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden text-foreground"
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Icons */}
+          <div className="flex items-center gap-3">
+            <Link to="/wishlist" className="relative p-1.5 hover:text-primary transition-colors text-foreground">
+              <Heart className="w-5 h-5" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center font-body">{wishlistCount}</span>
+              )}
+            </Link>
+            <Link to="/cart" className="relative p-1.5 hover:text-primary transition-colors text-foreground">
+              <ShoppingCart className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center font-body">{cartCount}</span>
+              )}
+            </Link>
+            {user ? (
+              <div className="flex items-center gap-2">
+                {isAdmin && (
+                  <Link to="/admin" className="p-1.5 hover:text-primary transition-colors text-foreground">
+                    <Shield className="w-5 h-5" />
+                  </Link>
+                )}
+                <button onClick={signOut} className="p-1.5 hover:text-primary transition-colors text-foreground" title="Sign Out">
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
+            ) : (
+              <Link to="/auth" className="p-1.5 hover:text-primary transition-colors text-foreground">
+                <User className="w-5 h-5" />
+              </Link>
+            )}
+
+            {/* Mobile Toggle */}
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="md:hidden text-foreground"
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
