@@ -5,8 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProducts } from "@/hooks/useProducts";
 import { useQueryClient } from "@tanstack/react-query";
 import GoldButton from "@/components/GoldButton";
-import { Trash2, Edit, Plus, Package, ShoppingBag } from "lucide-react";
+import { Trash2, Edit, Package, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
+import { api } from "@/lib/api";
 
 const Admin = () => {
   const { user, isAdmin, loading } = useAuth();
@@ -75,25 +76,30 @@ const ProductsTab = () => {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const payload = { name: form.name, price: Number(form.price), category: form.category, description: form.description, image_url: form.image_url || null, in_stock: form.in_stock };
-    if (editing) {
-      const { error } = await supabase.from("products").update(payload).eq("id", editing.id);
-      if (error) { toast.error(error.message); return; }
-      toast.success("Product updated!");
-    } else {
-      const { error } = await supabase.from("products").insert(payload);
-      if (error) { toast.error(error.message); return; }
-      toast.success("Product added!");
+    try {
+      if (editing) {
+        await api.patch(`/api/products/${editing.id}`, payload);
+        toast.success("Product updated!");
+      } else {
+        await api.post("/api/products", payload);
+        toast.success("Product added!");
+      }
+      qc.invalidateQueries({ queryKey: ["products"] });
+      resetForm();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save");
     }
-    qc.invalidateQueries({ queryKey: ["products"] });
-    resetForm();
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this product?")) return;
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    qc.invalidateQueries({ queryKey: ["products"] });
-    toast.success("Product deleted!");
+    try {
+      await api.delete(`/api/products/${id}`);
+      qc.invalidateQueries({ queryKey: ["products"] });
+      toast.success("Product deleted!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete");
+    }
   };
 
   const inputClass = "w-full bg-card border border-border p-3 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 rounded-sm";
@@ -146,22 +152,46 @@ const ProductsTab = () => {
 const OrdersTab = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [trackingInputs, setTrackingInputs] = useState<Record<string, string>>({});
 
   const fetchOrders = async () => {
-    const { data } = await supabase
-      .from("orders")
-      .select("*, order_items(*, products(name))")
-      .order("created_at", { ascending: false });
-    setOrders(data || []);
+    try {
+      const data = await api.get("/api/orders");
+      setOrders(data || []);
+    } catch {
+      setOrders([]);
+    }
     setLoading(false);
   };
 
-  useEffect(() => { fetchOrders(); }, []);
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   const updateStatus = async (orderId: string, status: string) => {
-    await supabase.from("orders").update({ status }).eq("id", orderId);
-    toast.success(`Order marked as ${status}`);
-    fetchOrders();
+    try {
+      await api.patch(`/api/orders/${orderId}`, { status });
+      toast.success(`Order marked as ${status}`);
+      fetchOrders();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update");
+    }
+  };
+
+  const saveTracking = async (orderId: string) => {
+    const tracking_number = trackingInputs[orderId]?.trim();
+    if (!tracking_number) {
+      toast.error("Enter tracking number");
+      return;
+    }
+    try {
+      await api.patch(`/api/orders/${orderId}`, { tracking_number });
+      toast.success("Tracking number saved");
+      setTrackingInputs((p) => ({ ...p, [orderId]: "" }));
+      fetchOrders();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save");
+    }
   };
 
   if (loading) return <p className="text-muted-foreground font-body">Loading orders...</p>;
@@ -187,15 +217,27 @@ const OrdersTab = () => {
             <p>{o.shipping_name} · {o.shipping_phone}</p>
             <p>{o.shipping_address}, {o.shipping_city}</p>
           </div>
+          {o.tracking_number && (
+            <p className="font-body text-xs text-primary">Tracking: {o.tracking_number}</p>
+          )}
+          <div className="flex flex-wrap gap-2 items-center">
+            <input
+              placeholder="Tracking number"
+              value={trackingInputs[o.id] ?? ""}
+              onChange={(e) => setTrackingInputs((p) => ({ ...p, [o.id]: e.target.value }))}
+              className="max-w-[200px] bg-background border border-border px-3 py-1.5 font-body text-xs rounded-sm"
+            />
+            <button onClick={() => saveTracking(o.id)} className="px-3 py-1.5 border border-primary/40 text-primary font-body text-xs rounded-sm hover:bg-primary/10">Save tracking</button>
+          </div>
           <div className="space-y-1">
             {o.order_items?.map((item: any) => (
               <p key={item.id} className="font-body text-xs text-foreground">
-                {item.product_name} × {item.quantity} ({item.size}) — Rs. {(item.price * item.quantity).toLocaleString()}
+                {item.product_name} × {item.quantity} {item.size ? `(${item.size})` : ""} — Rs. {(item.price * item.quantity).toLocaleString()}
               </p>
             ))}
           </div>
-          <div className="flex items-center justify-between">
-            <p className="font-display text-sm text-primary">Total: Rs. {o.total.toLocaleString()}</p>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <p className="font-display text-sm text-primary">Total: Rs. {Number(o.total).toLocaleString()}</p>
             <div className="flex gap-2">
               {o.status === "pending" && <button onClick={() => updateStatus(o.id, "processing")} className="px-3 py-1 border border-blue-400/40 text-blue-400 font-body text-xs rounded-sm hover:bg-blue-400/10">Process</button>}
               {(o.status === "pending" || o.status === "processing") && <button onClick={() => updateStatus(o.id, "delivered")} className="px-3 py-1 border border-green-400/40 text-green-400 font-body text-xs rounded-sm hover:bg-green-400/10">Delivered</button>}

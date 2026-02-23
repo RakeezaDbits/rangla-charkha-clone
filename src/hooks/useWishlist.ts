@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
 
 export const useWishlist = () => {
@@ -11,12 +11,7 @@ export const useWishlist = () => {
     queryKey: ["wishlist", user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
-        .from("wishlist_items")
-        .select("*, products(*)")
-        .eq("user_id", user.id);
-      if (error) throw error;
-      return data;
+      return api.get("/api/wishlist");
     },
     enabled: !!user,
   });
@@ -26,14 +21,11 @@ export const useWishlist = () => {
       if (!user) throw new Error("Login required");
       const existing = wishlistItems.find((i: any) => i.product_id === productId);
       if (existing) {
-        const { error } = await supabase.from("wishlist_items").delete().eq("id", existing.id);
-        if (error) throw error;
+        await api.delete(`/api/wishlist/${productId}`);
         return { added: false };
-      } else {
-        const { error } = await supabase.from("wishlist_items").insert({ user_id: user.id, product_id: productId });
-        if (error) throw error;
-        return { added: true };
       }
+      await api.post("/api/wishlist/toggle", { product_id: productId });
+      return { added: true };
     },
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["wishlist"] });

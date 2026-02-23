@@ -1,71 +1,81 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import type { User, Session } from "@supabase/supabase-js";
+import { api, setAuthToken, clearAuthToken } from "@/lib/api";
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  full_name?: string | null;
+  role: string;
+}
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: AuthUser | null;
   loading: boolean;
   isAdmin: boolean;
-  signOut: () => Promise<void>;
+  signOut: () => void;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, full_name?: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  session: null,
   loading: true,
   isAdmin: false,
-  signOut: async () => {},
+  signOut: () => {},
+  login: async () => {},
+  register: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
 
-  const checkAdmin = async (userId: string) => {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
-    setIsAdmin(!!data);
+  const loadUser = async () => {
+    try {
+      const res = await api.get("/api/me");
+      setUser(res?.user ?? null);
+    } catch {
+      setUser(null);
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        setTimeout(() => checkAdmin(session.user.id), 0);
-      } else {
-        setIsAdmin(false);
-      }
-      setLoading(false);
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        checkAdmin(session.user.id);
-      }
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    const token = localStorage.getItem("auth_token");
+    if (token) loadUser();
+    else setLoading(false);
   }, []);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
+  const login = async (email: string, password: string) => {
+    const res = await api.post("/api/auth/login", { email, password });
+    setAuthToken(res.token);
+    setUser(res.user);
+  };
+
+  const register = async (email: string, password: string, full_name?: string) => {
+    const res = await api.post("/api/auth/register", { email, password, full_name });
+    setAuthToken(res.token);
+    setUser(res.user);
+  };
+
+  const signOut = () => {
+    clearAuthToken();
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        isAdmin: user?.role === "admin",
+        signOut,
+        login,
+        register,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

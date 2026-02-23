@@ -3,16 +3,11 @@ import { useCart } from "@/hooks/useCart";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import GoldButton from "@/components/GoldButton";
 import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useState } from "react";
 
 const Cart = () => {
   const { user } = useAuth();
-  const { cartItems, cartTotal, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { cartItems, cartTotal, removeFromCart, updateQuantity } = useCart();
   const navigate = useNavigate();
-  const [checkingOut, setCheckingOut] = useState(false);
-  const [form, setForm] = useState({ name: "", phone: "", address: "", city: "" });
 
   if (!user) {
     return (
@@ -33,47 +28,6 @@ const Cart = () => {
       </main>
     );
   }
-
-  const handleCheckout = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setCheckingOut(true);
-    try {
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          user_id: user.id,
-          total: cartTotal,
-          shipping_name: form.name,
-          shipping_phone: form.phone,
-          shipping_address: form.address,
-          shipping_city: form.city,
-        })
-        .select()
-        .single();
-      if (orderError) throw orderError;
-
-      const orderItems = cartItems.map((item: any) => ({
-        order_id: order.id,
-        product_id: item.product_id,
-        product_name: item.products?.name || "Product",
-        price: item.products?.price || 0,
-        quantity: item.quantity,
-        size: item.size,
-      }));
-
-      const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
-      if (itemsError) throw itemsError;
-
-      await clearCart.mutateAsync();
-      toast.success("Order placed successfully! We'll contact you soon.");
-      navigate("/");
-    } catch (e: any) {
-      toast.error(e.message || "Checkout failed");
-    }
-    setCheckingOut(false);
-  };
-
-  const inputClass = "w-full bg-card border border-border p-3 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 rounded-sm";
 
   return (
     <main className="py-16">
@@ -133,17 +87,9 @@ const Cart = () => {
               <span>Total</span>
               <span className="text-primary">Rs. {cartTotal.toLocaleString()}</span>
             </div>
-
-            <form onSubmit={handleCheckout} className="space-y-3 pt-4">
-              <h3 className="font-display text-sm text-foreground">Shipping Details</h3>
-              <input placeholder="Full Name" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required className={inputClass} />
-              <input placeholder="Phone (e.g. 03209417086)" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} required className={inputClass} />
-              <input placeholder="Address" value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} required className={inputClass} />
-              <input placeholder="City" value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} required className={inputClass} />
-              <GoldButton type="submit" className="w-full text-center">
-                {checkingOut ? "Placing Order..." : "Place Order (COD)"}
-              </GoldButton>
-            </form>
+            <GoldButton onClick={() => navigate("/checkout")} className="w-full text-center">
+              Proceed to Checkout
+            </GoldButton>
           </div>
         </div>
       </div>

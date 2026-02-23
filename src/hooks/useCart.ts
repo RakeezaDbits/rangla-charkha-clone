@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
 
 export const useCart = () => {
@@ -11,12 +11,7 @@ export const useCart = () => {
     queryKey: ["cart", user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
-        .from("cart_items")
-        .select("*, products(*)")
-        .eq("user_id", user.id);
-      if (error) throw error;
-      return data;
+      return api.get("/api/cart");
     },
     enabled: !!user,
   });
@@ -24,10 +19,7 @@ export const useCart = () => {
   const addToCart = useMutation({
     mutationFn: async ({ productId, size = "M" }: { productId: string; size?: string }) => {
       if (!user) throw new Error("Login required");
-      const { error } = await supabase
-        .from("cart_items")
-        .insert({ user_id: user.id, product_id: productId, size, quantity: 1 });
-      if (error) throw error;
+      await api.post("/api/cart", { product_id: productId, size, quantity: 1 });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["cart"] });
@@ -38,16 +30,14 @@ export const useCart = () => {
 
   const removeFromCart = useMutation({
     mutationFn: async (itemId: string) => {
-      const { error } = await supabase.from("cart_items").delete().eq("id", itemId);
-      if (error) throw error;
+      await api.delete(`/api/cart/${itemId}`);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cart"] }),
   });
 
   const updateQuantity = useMutation({
     mutationFn: async ({ itemId, quantity }: { itemId: string; quantity: number }) => {
-      const { error } = await supabase.from("cart_items").update({ quantity }).eq("id", itemId);
-      if (error) throw error;
+      await api.patch(`/api/cart/${itemId}`, { quantity });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cart"] }),
   });
@@ -55,14 +45,16 @@ export const useCart = () => {
   const clearCart = useMutation({
     mutationFn: async () => {
       if (!user) return;
-      const { error } = await supabase.from("cart_items").delete().eq("user_id", user.id);
-      if (error) throw error;
+      await api.delete("/api/cart/clear");
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cart"] }),
   });
 
   const cartCount = cartItems.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0);
-  const cartTotal = cartItems.reduce((sum: number, item: any) => sum + (item.products?.price || 0) * (item.quantity || 1), 0);
+  const cartTotal = cartItems.reduce(
+    (sum: number, item: any) => sum + (item.products?.price ?? item.products?.product_price ?? 0) * (item.quantity || 1),
+    0
+  );
 
   return { cartItems, isLoading, addToCart, removeFromCart, updateQuantity, clearCart, cartCount, cartTotal };
 };

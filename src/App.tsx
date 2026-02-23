@@ -14,8 +14,11 @@ import LawnCollection from "./pages/LawnCollection";
 import CasualWear from "./pages/CasualWear";
 import Auth from "./pages/Auth";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
 import Wishlist from "./pages/Wishlist";
 import Admin from "./pages/Admin";
+import TrackOrder from "./pages/TrackOrder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,8 +39,11 @@ const App = () => (
             <Route path="/casual-wear" element={<CasualWear />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/checkout-success" element={<CheckoutSuccess />} />
             <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/manage" element={<Admin />} />
+            <Route path="/track-order" element={<TrackOrder />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Footer />

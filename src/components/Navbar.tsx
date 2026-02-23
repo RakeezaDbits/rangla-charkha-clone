@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ShoppingCart, Heart, User, LogOut, Shield } from "lucide-react";
+import { Menu, X, ShoppingCart, Heart, User, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
-import logo from "@/assets/logo.jpeg";
+import logo from "@/assets/logo.png";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -17,7 +17,7 @@ const navLinks = [
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
 
@@ -81,11 +81,6 @@ const Navbar = () => {
             </Link>
             {user ? (
               <div className="flex items-center gap-2">
-                {isAdmin && (
-                  <Link to="/admin" className="p-1.5 hover:text-primary transition-colors text-foreground">
-                    <Shield className="w-5 h-5" />
-                  </Link>
-                )}
                 <button onClick={signOut} className="p-1.5 hover:text-primary transition-colors text-foreground" title="Sign Out">
                   <LogOut className="w-5 h-5" />
                 </button>

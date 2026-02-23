@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Mail, Phone } from "lucide-react";
-import logo from "@/assets/logo.jpeg";
+import logo from "@/assets/logo.png";
 
 const Footer = () => {
   return (
@@ -31,6 +31,7 @@ const Footer = () => {
                 { label: "Home", path: "/" },
                 { label: "Lawn Collection", path: "/lawn-collection" },
                 { label: "Casual Wear", path: "/casual-wear" },
+                { label: "Track Order", path: "/track-order" },
                 { label: "About Us", path: "/about" },
                 { label: "Contact", path: "/contact" },
               ].map((link) => (
