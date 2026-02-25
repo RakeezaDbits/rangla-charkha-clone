@@ -14,10 +14,10 @@ const Footer = () => {
               Premium lawn and casual wear for modern women in Pakistan. Affordable luxury fashion.
             </p>
             <div className="flex gap-3">
-              <a href="https://facebook.com/ranglacharkha28" target="_blank" rel="noopener noreferrer" className="p-2 border border-border rounded-sm hover:border-primary/40 text-muted-foreground hover:text-primary transition-colors">
+              <a href="https://www.facebook.com/share/1NMaMvd1Hm/" target="_blank" rel="noopener noreferrer" className="p-2 border border-border rounded-sm hover:border-primary/40 text-muted-foreground hover:text-primary transition-colors">
                 <Facebook className="w-4 h-4" />
               </a>
-              <a href="https://instagram.com/rangla_chaekha" target="_blank" rel="noopener noreferrer" className="p-2 border border-border rounded-sm hover:border-primary/40 text-muted-foreground hover:text-primary transition-colors">
+              <a href="https://www.instagram.com/rangla_charkha?igsh=MWN3d3RkcHVuOGF4cA==" target="_blank" rel="noopener noreferrer" className="p-2 border border-border rounded-sm hover:border-primary/40 text-muted-foreground hover:text-primary transition-colors">
                 <Instagram className="w-4 h-4" />
               </a>
             </div>

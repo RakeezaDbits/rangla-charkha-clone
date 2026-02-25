@@ -26,7 +26,7 @@ const TrackOrder = () => {
     setError("");
     setOrder(null);
     if (!orderId.trim() || !phone.trim()) {
-      setError("Order ID and phone number are required.");
+      setError("Order number and phone or email are required.");
       return;
     }
     setLoading(true);
@@ -49,25 +49,27 @@ const TrackOrder = () => {
       <div className="container mx-auto px-4 max-w-lg">
         <h1 className="font-display text-3xl text-foreground text-center mb-2">Track Your Order</h1>
         <p className="font-body text-muted-foreground text-center mb-8">
-          Enter your order ID and phone number to see status.
+          Enter your order number and phone or email to see status.
         </p>
 
         <form onSubmit={handleTrack} className="space-y-4 mb-8">
           <input
-            placeholder="Order ID (e.g. from confirmation)"
+            type="text"
+            placeholder="Order Number (#xxxxxx)"
             value={orderId}
             onChange={(e) => setOrderId(e.target.value)}
             className={inputClass}
           />
           <input
-            placeholder="Phone number (e.g. 03209417086)"
+            type="text"
+            placeholder="Phone or Email"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             className={inputClass}
           />
           {error && <p className="font-body text-sm text-destructive">{error}</p>}
-          <GoldButton type="submit" className="w-full text-center" disabled={loading}>
-            {loading ? "Searching..." : "Track Order"}
+          <GoldButton type="submit" className="w-full text-center uppercase tracking-wider font-body" disabled={loading}>
+            {loading ? "Searching..." : "Track my order!"}
           </GoldButton>
         </form>
 
