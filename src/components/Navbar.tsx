@@ -30,10 +30,8 @@ const Navbar = () => {
             <span>🚚</span>
             <span className="font-body">Free Nationwide Delivery</span>
           </div>
-          <div className="hidden md:flex items-center gap-2 text-primary font-body">
-            <span>🔥</span>
-            <span>Summer Sale Live</span>
-            <span>🔥</span>
+          <div className="hidden md:flex items-center gap-2">
+            <span className="bg-primary text-primary-foreground px-2 py-0.5 rounded font-body text-xs font-medium tracking-wide">Eid Sale 30% Off</span>
           </div>
           <div className="flex items-center gap-1 text-muted-foreground">
             <a href="https://wa.me/923209417086" target="_blank" rel="noopener noreferrer" className="p-1.5 hover:text-primary transition-colors text-xs font-body">

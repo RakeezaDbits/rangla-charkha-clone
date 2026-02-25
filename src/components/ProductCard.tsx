@@ -9,6 +9,7 @@ interface ProductCardProps {
     id: string;
     name: string;
     price: number;
+    original_price?: number | null;
     image_url: string | null;
     in_stock: boolean;
   };
@@ -53,7 +54,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
       </div>
       <div className="p-4 space-y-2">
         <h3 className="font-display text-sm text-foreground">{product.name}</h3>
-        <p className="font-body text-sm text-primary">Rs. {product.price.toLocaleString()}</p>
+        <div className="font-body text-sm">
+          {product.original_price != null && product.original_price > product.price ? (
+            <>
+              <span className="text-muted-foreground line-through mr-2">Rs. {product.original_price.toLocaleString()}</span>
+              <span className="text-primary font-medium">Rs. {product.price.toLocaleString()}</span>
+              <span className="ml-1 text-xs text-primary">(30% off)</span>
+            </>
+          ) : (
+            <span className="text-primary">Rs. {product.price.toLocaleString()}</span>
+          )}
+        </div>
         <button
           onClick={() => handleAction(() => addToCart.mutate({ productId: product.id }))}
           disabled={!product.in_stock}

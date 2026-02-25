@@ -46,6 +46,9 @@ export async function initDb() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )`);
+  try {
+    await pool.query("ALTER TABLE `product` ADD COLUMN original_price DECIMAL(10,2)");
+  } catch (_) {}
   await pool.query(`CREATE TABLE IF NOT EXISTS \`users\` (
       id VARCHAR(36) PRIMARY KEY,
       email VARCHAR(255) NOT NULL UNIQUE,
@@ -56,6 +59,12 @@ export async function initDb() {
     )`);
   try {
     await pool.query("ALTER TABLE `users` ADD COLUMN password_hash VARCHAR(255)");
+  } catch (_) {}
+  try {
+    await pool.query("ALTER TABLE `users` ADD COLUMN full_name VARCHAR(255)");
+  } catch (_) {}
+  try {
+    await pool.query("ALTER TABLE `users` ADD COLUMN role VARCHAR(20) DEFAULT 'user'");
   } catch (_) {}
   try {
     await pool.query("ALTER TABLE `users` ADD UNIQUE KEY unique_email (email)");

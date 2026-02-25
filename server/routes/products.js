@@ -29,10 +29,10 @@ router.get("/", async (req, res) => {
 router.post("/", authMiddleware, ensureUser, adminOnly, async (req, res) => {
   try {
     const id = crypto.randomUUID();
-    const { name, price, category, description, image_url, in_stock, sizes } = req.body;
+    const { name, price, category, description, image_url, in_stock, sizes, original_price } = req.body;
     await query(
-      `INSERT INTO product (id, name, price, category, description, image_url, in_stock, sizes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO product (id, name, price, category, description, image_url, in_stock, sizes, original_price)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         name,
@@ -42,6 +42,7 @@ router.post("/", authMiddleware, ensureUser, adminOnly, async (req, res) => {
         image_url || null,
         in_stock !== false ? 1 : 0,
         sizes ? JSON.stringify(Array.isArray(sizes) ? sizes : [sizes]) : null,
+        original_price != null ? Number(original_price) : null,
       ]
     );
     const [row] = await query("SELECT * FROM product WHERE id = ?", [id]);
@@ -54,9 +55,9 @@ router.post("/", authMiddleware, ensureUser, adminOnly, async (req, res) => {
 router.put("/:id", authMiddleware, ensureUser, adminOnly, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, category, description, image_url, in_stock, sizes } = req.body;
+    const { name, price, category, description, image_url, in_stock, sizes, original_price } = req.body;
     await query(
-      `UPDATE product SET name=?, price=?, category=?, description=?, image_url=?, in_stock=?, sizes=?, updated_at=CURRENT_TIMESTAMP WHERE id = ?`,
+      `UPDATE product SET name=?, price=?, category=?, description=?, image_url=?, in_stock=?, sizes=?, original_price=?, updated_at=CURRENT_TIMESTAMP WHERE id = ?`,
       [
         name,
         Number(price),
@@ -65,6 +66,7 @@ router.put("/:id", authMiddleware, ensureUser, adminOnly, async (req, res) => {
         image_url || null,
         in_stock !== false ? 1 : 0,
         sizes ? JSON.stringify(Array.isArray(sizes) ? sizes : [sizes]) : null,
+        original_price != null ? Number(original_price) : null,
         id,
       ]
     );

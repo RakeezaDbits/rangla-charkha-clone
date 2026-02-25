@@ -11,7 +11,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
 dotenv.config({ path: path.join(__dirname, "..", "..", ".env") });
 
-const stripe = new Stripe(process.env.STRIPE_SECRET || "");
+function getStripe() {
+  const secret = process.env.STRIPE_SECRET?.trim();
+  if (!secret) return null;
+  return new Stripe(secret);
+}
 const router = Router();
 
 router.post("/create-payment-intent", authMiddleware, ensureUser, async (req, res) => {
@@ -51,6 +55,8 @@ router.post("/create-payment-intent", authMiddleware, ensureUser, async (req, re
         ]
       );
     }
+    const stripe = getStripe();
+    if (!stripe) return res.status(503).json({ error: "Payments not configured (STRIPE_SECRET missing)" });
     const amountPaisa = Math.round(Number(total) * 100);
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.max(amountPaisa, 100),
