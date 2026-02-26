@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import MobileBottomNav from "./components/MobileBottomNav";
 import WhatsAppButton from "./components/WhatsAppButton";
+import ScrollToTop from "./components/ScrollToTop";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -31,6 +32,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollToTop />
           <Navbar />
           <div className="pb-20 md:pb-0">
           <Routes>
