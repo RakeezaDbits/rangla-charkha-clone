@@ -19,14 +19,14 @@ const CheckoutSuccess = () => {
     }
     (async () => {
       try {
-        await api.post(`/api/orders/${orderId}/confirm-payment`);
+        await api.post(`/api/orders/${orderId}/confirm-payment`, phone ? { phone } : {});
         await clearCart.mutateAsync();
         setDone(true);
       } catch (e: any) {
         setError(e.message || "Could not confirm order");
       }
     })();
-  }, [orderId]);
+  }, [orderId, phone]);
 
   if (error) {
     return (

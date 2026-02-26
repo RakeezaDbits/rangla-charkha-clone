@@ -3,7 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import { query } from "../db.js";
-import { authMiddleware, ensureUser } from "../auth.js";
+import { optionalAuth } from "../auth.js";
 import { Router } from "express";
 import crypto from "crypto";
 
@@ -18,9 +18,9 @@ function getStripe() {
 }
 const router = Router();
 
-router.post("/create-payment-intent", authMiddleware, ensureUser, async (req, res) => {
+router.post("/create-payment-intent", optionalAuth, async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = req.userId || null;
     const { total, shipping_name, shipping_phone, shipping_address, shipping_city, items } = req.body;
     if (!items?.length || total == null) {
       return res.status(400).json({ error: "total and items required" });

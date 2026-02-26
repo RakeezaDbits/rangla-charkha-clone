@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/hooks/useCart";
 import GoldButton from "@/components/GoldButton";
-import { api, clearAuthToken } from "@/lib/api";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_KEY || "");
@@ -53,28 +51,11 @@ const CheckoutForm = ({
 };
 
 const Checkout = () => {
-  const { user } = useAuth();
   const { cartItems, cartTotal } = useCart();
-  const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", phone: "", address: "", city: "" });
   const [step, setStep] = useState<"shipping" | "payment">("shipping");
   const [clientSecret, setClientSecret] = useState("");
   const [orderId, setOrderId] = useState("");
-
-  // [DEACTIVATED] Login required for checkout – uncomment to require auth
-  // if (!user) {
-  //   navigate("/auth");
-  //   return null;
-  // }
-  if (!user) {
-    return (
-      <main className="min-h-[60vh] flex flex-col items-center justify-center py-16 gap-4">
-        <h1 className="font-display text-3xl text-foreground">Checkout</h1>
-        <p className="font-body text-muted-foreground text-center max-w-sm">Guest checkout is not available. Cart is saved in this device. Sign in (when re-enabled) to complete payment.</p>
-        <GoldButton to="/cart">Back to Cart</GoldButton>
-      </main>
-    );
-  }
 
   if (cartItems.length === 0 && !clientSecret) {
     return (
@@ -93,8 +74,8 @@ const Checkout = () => {
     try {
       const items = cartItems.map((item: any) => ({
         product_id: item.product_id,
-        product_name: item.products?.name || item.products?.product_name || "Product",
-        price: item.products?.price ?? item.products?.product_price ?? 0,
+        product_name: item.products?.name || item.product_name || "Product",
+        price: item.products?.price ?? item.product_price ?? 0,
         quantity: item.quantity,
         size: item.size,
       }));
@@ -126,10 +107,10 @@ const Checkout = () => {
               {cartItems.map((item: any) => (
                 <div key={item.id} className="flex justify-between font-body text-sm py-1">
                   <span className="text-foreground">
-                    {item.products?.name || item.products?.product_name} × {item.quantity}
+                    {item.products?.name || item.product_name} × {item.quantity}
                   </span>
                   <span className="text-primary">
-                    Rs. {((item.products?.price ?? item.products?.product_price ?? 0) * item.quantity).toLocaleString()}
+                    Rs. {((item.products?.price ?? item.product_price ?? 0) * item.quantity).toLocaleString()}
                   </span>
                 </div>
               ))}

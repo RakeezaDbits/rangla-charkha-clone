@@ -1,6 +1,7 @@
 import { query } from "../db.js";
 import { Router } from "express";
 import { authMiddleware, ensureUser, adminOnly } from "../auth.js";
+import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
 const router = Router();
@@ -97,14 +98,28 @@ router.patch("/:id", authMiddleware, ensureUser, adminOnly, async (req, res) => 
   }
 });
 
-router.post("/:id/confirm-payment", authMiddleware, ensureUser, async (req, res) => {
+router.post("/:id/confirm-payment", async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.userId;
-    const [order] = await query("SELECT id, user_id, status FROM orders WHERE id = ?", [id]);
+    const auth = req.headers.authorization;
+    const token = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
+    let userId = null;
+    if (token && process.env.JWT_SECRET) {
+      try {
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        userId = payload.sub;
+      } catch (_) {}
+    }
+    const [order] = await query("SELECT id, user_id, status, shipping_phone FROM orders WHERE id = ?", [id]);
     if (!order) return res.status(404).json({ error: "Order not found" });
-    if (order.user_id !== userId) return res.status(403).json({ error: "Forbidden" });
     if (order.status !== "pending") return res.status(400).json({ error: "Order already confirmed" });
+    if (order.user_id != null) {
+      if (userId !== order.user_id) return res.status(403).json({ error: "Forbidden" });
+    } else {
+      const phone = (req.body?.phone || req.query?.phone || "").toString().replace(/\D/g, "");
+      const orderPhone = (order.shipping_phone || "").replace(/\D/g, "");
+      if (!phone || orderPhone !== phone) return res.status(403).json({ error: "Phone required to confirm guest order" });
+    }
     await query("UPDATE orders SET status = 'processing', updated_at = CURRENT_TIMESTAMP WHERE id = ?", [id]);
     const [updated] = await query("SELECT * FROM orders WHERE id = ?", [id]);
     res.json(updated);

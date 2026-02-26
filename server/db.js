@@ -72,7 +72,7 @@ export async function initDb() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS \`orders\` (
       id VARCHAR(36) PRIMARY KEY,
-      user_id VARCHAR(36) NOT NULL,
+      user_id VARCHAR(36),
       status VARCHAR(50) DEFAULT 'pending',
       total DECIMAL(10,2) NOT NULL,
       shipping_name VARCHAR(255),
@@ -84,6 +84,9 @@ export async function initDb() {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )
   `);
+  try {
+    await pool.query("ALTER TABLE `orders` MODIFY COLUMN user_id VARCHAR(36) NULL");
+  } catch (_) {}
   await pool.query(`
     CREATE TABLE IF NOT EXISTS \`order_items\` (
       id VARCHAR(36) PRIMARY KEY,
