@@ -1,8 +1,6 @@
 import { Heart, ShoppingCart } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
-import { useNavigate } from "react-router-dom";
 
 interface ProductCardProps {
   product: {
@@ -16,19 +14,8 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
-  const { user } = useAuth();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
-  const navigate = useNavigate();
-
-  const handleAction = (action: () => void) => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
-    action();
-  };
-
   const wishlisted = isInWishlist(product.id);
 
   return (
@@ -41,7 +28,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           loading="lazy"
         />
         <button
-          onClick={() => handleAction(() => toggleWishlist.mutate(product.id))}
+          onClick={() => toggleWishlist.mutate(product.id)}
           className="absolute top-3 right-3 p-2 bg-background/70 backdrop-blur-sm rounded-full hover:bg-background transition-colors"
         >
           <Heart className={`w-4 h-4 ${wishlisted ? "fill-primary text-primary" : "text-foreground"}`} />
@@ -66,7 +53,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           )}
         </div>
         <button
-          onClick={() => handleAction(() => addToCart.mutate({ productId: product.id }))}
+          onClick={() => addToCart.mutate({ productId: product.id, product: { name: product.name, price: product.price, image_url: product.image_url } })}
           disabled={!product.in_stock}
           className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-primary/40 text-primary hover:border-primary hover:bg-primary/5 font-body text-xs tracking-widest uppercase transition-all duration-300 disabled:opacity-50"
         >

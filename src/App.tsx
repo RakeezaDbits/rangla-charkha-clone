@@ -39,7 +39,8 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/lawn-collection" element={<LawnCollection />} />
             <Route path="/casual-wear" element={<CasualWear />} />
-            <Route path="/auth" element={<Auth />} />
+            {/* [DEACTIVATED] Login/Signup – uncomment to enable auth page */}
+            {/* <Route path="/auth" element={<Auth />} /> */}
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/checkout-success" element={<CheckoutSuccess />} />

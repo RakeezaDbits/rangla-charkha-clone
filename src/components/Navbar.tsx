@@ -77,7 +77,8 @@ const Navbar = () => {
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center font-body">{cartCount}</span>
               )}
             </Link>
-            {user ? (
+            {/* [DEACTIVATED] Login/Signup – uncomment to show auth in header */}
+            {/* {user ? (
               <div className="flex items-center gap-2">
                 <button onClick={signOut} className="p-1.5 hover:text-primary transition-colors text-foreground" title="Sign Out">
                   <LogOut className="w-5 h-5" />
@@ -87,7 +88,7 @@ const Navbar = () => {
               <Link to="/auth" className="p-1.5 hover:text-primary transition-colors text-foreground">
                 <User className="w-5 h-5" />
               </Link>
-            )}
+            )} */}
 
             {/* Mobile Toggle */}
             <button

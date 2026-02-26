@@ -1,23 +1,10 @@
-import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/hooks/useCart";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import GoldButton from "@/components/GoldButton";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Cart = () => {
-  const { user } = useAuth();
   const { cartItems, cartTotal, removeFromCart, updateQuantity } = useCart();
-  const navigate = useNavigate();
-
-  if (!user) {
-    return (
-      <main className="min-h-[60vh] flex flex-col items-center justify-center py-16 gap-4">
-        <h1 className="font-display text-3xl text-foreground">Your Cart</h1>
-        <p className="font-body text-muted-foreground">Please login to view your cart.</p>
-        <GoldButton to="/auth">Sign In</GoldButton>
-      </main>
-    );
-  }
 
   if (cartItems.length === 0) {
     return (
@@ -38,14 +25,14 @@ const Cart = () => {
             {cartItems.map((item: any) => (
               <div key={item.id} className="flex gap-4 bg-card border border-border rounded-sm p-4">
                 <img
-                  src={item.products?.image_url || "/placeholder.svg"}
-                  alt={item.products?.name}
+                  src={item.products?.image_url || item.product_image_url || "/placeholder.svg"}
+                  alt={item.products?.name || item.product_name}
                   className="w-20 h-24 object-cover rounded-sm"
                 />
                 <div className="flex-1 space-y-1">
-                  <h3 className="font-display text-sm text-foreground">{item.products?.name}</h3>
+                  <h3 className="font-display text-sm text-foreground">{item.products?.name || item.product_name}</h3>
                   <p className="font-body text-xs text-muted-foreground">Size: {item.size}</p>
-                  <p className="font-body text-sm text-primary">Rs. {item.products?.price?.toLocaleString()}</p>
+                  <p className="font-body text-sm text-primary">Rs. {(item.products?.price ?? item.product_price ?? 0).toLocaleString()}</p>
                   <div className="flex items-center gap-2 mt-2">
                     <button
                       onClick={() => updateQuantity.mutate({ itemId: item.id, quantity: Math.max(1, item.quantity - 1) })}
@@ -87,7 +74,7 @@ const Cart = () => {
               <span>Total</span>
               <span className="text-primary">Rs. {cartTotal.toLocaleString()}</span>
             </div>
-            <GoldButton onClick={() => navigate("/checkout")} className="w-full text-center">
+            <GoldButton to="/checkout" className="w-full text-center">
               Proceed to Checkout
             </GoldButton>
           </div>

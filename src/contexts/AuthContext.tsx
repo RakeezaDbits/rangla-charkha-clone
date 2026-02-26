@@ -42,27 +42,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(false);
   };
 
+  // [DEACTIVATED] Login/signup – using local storage for guest cart/wishlist. Uncomment to re-enable auth.
+  // useEffect(() => {
+  //   const token = localStorage.getItem("auth_token");
+  //   if (token) loadUser();
+  //   else setLoading(false);
+  // }, []);
+
   useEffect(() => {
-    const token = localStorage.getItem("auth_token");
-    if (token) loadUser();
-    else setLoading(false);
+    setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const res = await api.post("/api/auth/login", { email, password });
-    setAuthToken(res.token);
-    setUser(res.user);
+  const login = async (_email: string, _password: string) => {
+    // [DEACTIVATED] const res = await api.post("/api/auth/login", { email, password });
+    // setAuthToken(res.token); setUser(res.user);
   };
 
-  const register = async (email: string, password: string, full_name?: string) => {
-    const res = await api.post("/api/auth/register", { email, password, full_name });
-    setAuthToken(res.token);
-    setUser(res.user);
+  const register = async (_email: string, _password: string, _full_name?: string) => {
+    // [DEACTIVATED] const res = await api.post("/api/auth/register", { email, password, full_name });
+    // setAuthToken(res.token); setUser(res.user);
   };
 
   const signOut = () => {
-    clearAuthToken();
-    setUser(null);
+    // [DEACTIVATED] clearAuthToken(); setUser(null);
   };
 
   return (

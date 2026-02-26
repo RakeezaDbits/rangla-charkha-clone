@@ -61,9 +61,19 @@ const Checkout = () => {
   const [clientSecret, setClientSecret] = useState("");
   const [orderId, setOrderId] = useState("");
 
+  // [DEACTIVATED] Login required for checkout – uncomment to require auth
+  // if (!user) {
+  //   navigate("/auth");
+  //   return null;
+  // }
   if (!user) {
-    navigate("/auth");
-    return null;
+    return (
+      <main className="min-h-[60vh] flex flex-col items-center justify-center py-16 gap-4">
+        <h1 className="font-display text-3xl text-foreground">Checkout</h1>
+        <p className="font-body text-muted-foreground text-center max-w-sm">Guest checkout is not available. Cart is saved in this device. Sign in (when re-enabled) to complete payment.</p>
+        <GoldButton to="/cart">Back to Cart</GoldButton>
+      </main>
+    );
   }
 
   if (cartItems.length === 0 && !clientSecret) {
